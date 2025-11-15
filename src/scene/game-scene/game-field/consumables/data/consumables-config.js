@@ -20,8 +20,8 @@ const CONSUMABLES_CONFIG = {
   [CONSUMABLE_TYPE.BoosterCandyPlayerSpeed]: {
     lifeTime: { min: 20000, max: 25000 },
     name: 'Speed Boost',
-    color: 0x00aa00,
-    particlesColor: 0x00aa00,
+    color: 0x44ff44, // Brighter toxic green for better visibility
+    particlesColor: 0x44ff44,
     progressBarWidth: 200,
     duration: 18000,
     speedMultiplier: 2.2,
@@ -29,16 +29,16 @@ const CONSUMABLES_CONFIG = {
   [CONSUMABLE_TYPE.BoosterCandyPlayerInvulnerability]: {
     lifeTime: { min: 20000, max: 25000 },
     name: 'Invincibility',
-    color: 0xd43733,
-    particlesColor: 0xd43733,
+    color: 0xff3333, // More vibrant red for danger/power
+    particlesColor: 0xff3333,
     progressBarWidth: 190,
     duration: 12000,
   },
   [CONSUMABLE_TYPE.BoosterCandyEnemiesSlow]: {
     lifeTime: { min: 20000, max: 25000 },
     name: 'SlowMo',
-    color: 0x0000bb,
-    particlesColor: 0x1aa0dc,
+    color: 0x4444ff, // Brighter blue for magical effect
+    particlesColor: 0x66aaff, // Lighter blue particles
     progressBarWidth: 130,
     duration: 18000,
     speedMultiplier: 0.4,

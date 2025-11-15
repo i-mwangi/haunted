@@ -140,7 +140,7 @@ export default class BaseScene {
       this._scene.add(ambientLight);
     }
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
+    const directionalLight = new THREE.DirectionalLight(0xff8c42, 1.8); // Warm orange moonlight
     directionalLight.position.set(-3, 5, 5);
     this._scene.add(directionalLight);
 

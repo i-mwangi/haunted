@@ -1,6 +1,6 @@
 const FIREFLIES_CONFIG = {
   count: 500,
-  color: 0xd78126,
+  color: 0xffaa44, // More golden, magical glow for spooky atmosphere
   size: {
     desktop: 90,
     mobile: 60,

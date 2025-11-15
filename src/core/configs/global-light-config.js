@@ -1,8 +1,8 @@
 const GLOBAL_LIGHT_CONFIG = {
   ambient: {
     enabled: true,
-    color: 0xffffff, // 0xFFEFE4
-    intensity: 1.5,
+    color: 0x4a2c5e, // Purple-tinted ambient for spooky atmosphere
+    intensity: 0.8, // Darker for more dramatic shadows
   },
 }
 
