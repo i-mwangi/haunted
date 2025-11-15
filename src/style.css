@@ -5,6 +5,13 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'NeedleTeeth';
+  src: url('/needleteeth.spooky.ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+
 *
 {
   margin: 0;

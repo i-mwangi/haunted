@@ -1,4 +1,4 @@
-# Haunted Pumpkin Game - Implementation Tasks
+# Ghost Dodger - Implementation Tasks
 
 ## Phase 1: Project Setup ✅
 - [x] Initialize Vite project with Three.js

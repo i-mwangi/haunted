@@ -1,7 +1,7 @@
 # Game Mechanics Specification
 
 ## Overview
-Specification for the core gameplay mechanics of Haunted Pumpkin, a Halloween-themed arcade game.
+Specification for the core gameplay mechanics of Ghost Dodger, a Halloween-themed arcade game.
 
 ## Player Character
 - 3D pumpkin model as the player character

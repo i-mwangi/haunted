@@ -1,6 +1,6 @@
 export default class LeaderboardManager {
     constructor() {
-        this._storageKey = 'haunted-pumpkin-leaderboard';
+        this._storageKey = 'ghost-dodger-leaderboard';
         this._maxEntries = 10;
     }
 

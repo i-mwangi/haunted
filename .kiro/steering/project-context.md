@@ -1,7 +1,7 @@
-# Haunted Pumpkin - Project Context
+# Ghost Dodger - Project Context
 
 ## Project Overview
-A spooky Halloween-themed 3D game built with Three.js and Black Engine for the Kiroween hackathon. Players control a haunted pumpkin character navigating through a Halloween environment, collecting items and avoiding obstacles.
+A spooky Halloween-themed 3D game built with Three.js and Black Engine for the Kiroween hackathon. Players control a pumpkin character navigating through a Halloween environment, dodging ghosts, collecting candy, and avoiding obstacles.
 
 ## Technology Stack
 - **3D Graphics**: Three.js for WebGL rendering

@@ -90,7 +90,7 @@ export default class AchievementManager {
   constructor() {
     this.events = new MessageDispatcher();
 
-    this._storageKey = 'haunted-pumpkin-achievements';
+    this._storageKey = 'ghost-dodger-achievements';
     this._unlockedAchievements = this._loadAchievements();
     
     // Session tracking

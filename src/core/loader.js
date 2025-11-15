@@ -58,6 +58,7 @@ const sounds = [
 
 const fonts = [
   'halloween_spooky.ttf',
+  'needleteeth.spooky.ttf',
 ];
 
 const loadingPercentElement = document.querySelector('.loading-percent');

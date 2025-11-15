@@ -17,11 +17,11 @@ export default class StartGameScreen extends ScreenAbstract {
     super.show();
 
     this._animateStartGameButton();
-    
+
     // Ensure buttons are touchable when shown
     this._startGameButton.touchable = true;
     this._achievementsButton.touchable = true;
-    
+
     console.log('Start button touchable:', this._startGameButton.touchable);
     console.log('Achievements button touchable:', this._achievementsButton.touchable);
   }
@@ -55,10 +55,16 @@ export default class StartGameScreen extends ScreenAbstract {
   }
 
   _initLogo() {
-    const logo = this._logo = new Sprite('logo');
+    const logo = this._logo = new TextField('GHOST DODGER', 'needleteeth.spooky', 0xff3300, 300);
     this.add(logo);
 
-    logo.alignPivot();
+    logo.alignAnchor(0.5, 0.5);
+
+    logo.dropShadow = true;
+    logo.shadowBlur = 4;
+    logo.shadowAlpha = 0.8;
+    logo.shadowDistanceX = 7;
+    logo.shadowDistanceY = 7;
   }
 
   _initStartGameButton() {
@@ -85,7 +91,7 @@ export default class StartGameScreen extends ScreenAbstract {
       console.log('Start game button clicked');
       this.post('onStartGame');
     });
-    
+
     this._achievementsButton.on('pointerDown', () => {
       console.log('Achievements button clicked');
       this.post('onViewAchievements');
@@ -114,9 +120,9 @@ export default class StartGameScreen extends ScreenAbstract {
 
     if (SCENE_CONFIG.isMobile) {
       if (window.innerWidth < window.innerHeight) {
-        this._logo.scale = 0.6;
+        this._logo.fontSize = 80;
       } else {
-        this._logo.scale = 1;
+        this._logo.fontSize = 150;
       }
     }
   }

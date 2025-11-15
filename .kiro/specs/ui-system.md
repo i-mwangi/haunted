@@ -1,7 +1,7 @@
 # UI System Specification
 
 ## Overview
-User interface specification for Haunted Pumpkin game, focusing on a polished Halloween aesthetic.
+User interface specification for Ghost Dodger game, focusing on a polished Halloween aesthetic.
 
 ## UI Components
 

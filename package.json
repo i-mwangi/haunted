@@ -1,7 +1,7 @@
 {
-  "name": "Haunted-pumpkin",
+  "name": "ghost-dodger",
   "version": "0.1.0",
-  "description": "Haunted Pumpkin",
+  "description": "Ghost Dodger - A spooky Halloween arcade game",
   "license": "MIT",
   "type": "module",
   "scripts": {

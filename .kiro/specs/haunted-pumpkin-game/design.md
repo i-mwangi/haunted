@@ -1,4 +1,4 @@
-# Haunted Pumpkin Game - Design Document
+# Ghost Dodger - Design Document
 
 ## Visual Design
 
@@ -65,7 +65,7 @@ Accent Colors:
 ```
 ┌─────────────────────────────────┐
 │                                 │
-│      🎃 HAUNTED PUMPKIN 🎃     │
+│      👻 GHOST DODGER 👻        │
 │                                 │
 │        [  START GAME  ]         │
 │                                 │

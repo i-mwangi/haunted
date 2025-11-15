@@ -1,4 +1,4 @@
-# Haunted Pumpkin Game - Requirements
+# Ghost Dodger - Requirements
 
 ## Project Goal
 Create a polished, Halloween-themed 3D arcade game for the Kiroween hackathon that showcases a haunting user interface and immersive gameplay experience.

@@ -1,4 +1,4 @@
-# 🎮 Features Added to Haunted Pumpkin
+# 🎮 Features Added to Ghost Dodger
 
 ## Completed Features
 

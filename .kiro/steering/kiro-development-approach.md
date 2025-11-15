@@ -1,4 +1,4 @@
-# How Kiro Was Used to Develop Haunted Pumpkin
+# How Kiro Was Used to Develop Ghost Dodger
 
 ## Vibe Coding Approach
 
