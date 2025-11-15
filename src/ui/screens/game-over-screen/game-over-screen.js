@@ -1,5 +1,6 @@
 import { Black, Ease, TextField, Tween } from "black-engine";
 import ScreenAbstract from "../screen-abstract";
+import LeaderboardManager from "../../../core/leaderboard-manager";
 
 export default class GameOverScreen extends ScreenAbstract {
   constructor() {
@@ -8,8 +9,17 @@ export default class GameOverScreen extends ScreenAbstract {
     this._gameOverText = null;
     this._scoreText = null;
     this._restartGameButton = null;
+    this._viewLeaderboardButton = null;
+    this._rankText = null;
+    this._newRecordText = null;
+    this._leaderboardManager = new LeaderboardManager();
 
     this._score = 0;
+    this._maxCombo = 0;
+  }
+
+  setMaxCombo(combo) {
+    this._maxCombo = combo;
   }
 
   setScore(value) {
@@ -21,6 +31,28 @@ export default class GameOverScreen extends ScreenAbstract {
 
     this._animateRestartGameButton();
     this._updateScoreText();
+    this._updateLeaderboardInfo();
+  }
+
+  _updateLeaderboardInfo() {
+    const result = this._leaderboardManager.addScore(this._score, this._maxCombo);
+    
+    if (result.isNewRecord) {
+      this._newRecordText.visible = true;
+      this._newRecordText.text = '🏆 NEW HIGH SCORE! 🏆';
+      this._animateNewRecord();
+    } else if (result.isTopTen) {
+      this._rankText.visible = true;
+      this._rankText.text = `Rank #${result.rank}`;
+    } else {
+      this._rankText.visible = false;
+      this._newRecordText.visible = false;
+    }
+  }
+
+  _animateNewRecord() {
+    const tween = new Tween({ scale: 1.1 }, 0.6, { ease: Ease.sinusoidalInOut, loop: true, yoyo: true });
+    this._newRecordText.add(tween);
   }
 
   hide() {
@@ -37,8 +69,53 @@ export default class GameOverScreen extends ScreenAbstract {
   _init() {
     this._initGameOverText();
     this._initScoreText();
+    this._initRankText();
+    this._initNewRecordText();
     this._initRestartGameButton();
+    this._initViewLeaderboardButton();
     this._initSignals();
+  }
+
+  _initRankText() {
+    const rankText = this._rankText = new TextField('Rank #5', 'halloween_spooky', 0xffaa44, 50);
+
+    rankText.dropShadow = true;
+    rankText.shadowBlur = 1;
+    rankText.shadowAlpha = 0.4;
+    rankText.shadowDistanceX = 4;
+    rankText.shadowDistanceY = 4;
+
+    rankText.alignAnchor(0.5, 0.5);
+    rankText.visible = false;
+    this.add(rankText);
+  }
+
+  _initNewRecordText() {
+    const newRecordText = this._newRecordText = new TextField('NEW HIGH SCORE!', 'halloween_spooky', 0xff3333, 60);
+
+    newRecordText.dropShadow = true;
+    newRecordText.shadowBlur = 1;
+    newRecordText.shadowAlpha = 0.4;
+    newRecordText.shadowDistanceX = 4;
+    newRecordText.shadowDistanceY = 4;
+
+    newRecordText.alignAnchor(0.5, 0.5);
+    newRecordText.visible = false;
+    this.add(newRecordText);
+  }
+
+  _initViewLeaderboardButton() {
+    const viewLeaderboardButton = this._viewLeaderboardButton = new TextField('View Leaderboard', 'halloween_spooky', 0x0088aa, 70);
+    this.add(viewLeaderboardButton);
+
+    viewLeaderboardButton.dropShadow = true;
+    viewLeaderboardButton.shadowBlur = 1;
+    viewLeaderboardButton.shadowAlpha = 0.4;
+    viewLeaderboardButton.shadowDistanceX = 4;
+    viewLeaderboardButton.shadowDistanceY = 4;
+
+    viewLeaderboardButton.alignAnchor(0.5, 0.5);
+    viewLeaderboardButton.touchable = true;
   }
 
   _initGameOverText() {
@@ -92,18 +169,33 @@ export default class GameOverScreen extends ScreenAbstract {
     this._restartGameButton.on('pointerMove', () => {
       Black.engine.containerElement.style.cursor = 'pointer';
     });
+
+    this._viewLeaderboardButton.on('pointerDown', () => this.post('onViewLeaderboard'));
+
+    this._viewLeaderboardButton.on('pointerMove', () => {
+      Black.engine.containerElement.style.cursor = 'pointer';
+    });
   }
 
   _onResize() {
     const bounds = Black.stage.bounds;
 
     this._gameOverText.x = bounds.left + bounds.width * 0.5;
-    this._gameOverText.y = bounds.top + bounds.height * 0.3;
+    this._gameOverText.y = bounds.top + bounds.height * 0.25;
+
+    this._newRecordText.x = bounds.left + bounds.width * 0.5;
+    this._newRecordText.y = bounds.top + bounds.height * 0.38;
 
     this._scoreText.x = bounds.left + bounds.width * 0.5;
-    this._scoreText.y = bounds.top + bounds.height * 0.5;
+    this._scoreText.y = bounds.top + bounds.height * 0.45;
+
+    this._rankText.x = bounds.left + bounds.width * 0.5;
+    this._rankText.y = bounds.top + bounds.height * 0.53;
 
     this._restartGameButton.x = bounds.left + bounds.width * 0.5;
-    this._restartGameButton.y = bounds.top + bounds.height * 0.7;
+    this._restartGameButton.y = bounds.top + bounds.height * 0.65;
+
+    this._viewLeaderboardButton.x = bounds.left + bounds.width * 0.5;
+    this._viewLeaderboardButton.y = bounds.top + bounds.height * 0.78;
   }
 }

@@ -76,5 +76,10 @@ export default class Scene3D extends THREE.Group {
     this._gameScene.events.on('stopBooster', () => this.events.post('stopBooster'));
     this._gameScene.events.on('startInvulnerabilityBooster', (msg, duration) => this.events.post('startInvulnerabilityBooster', duration));
     this._gameScene.events.on('livesChanged', () => this.events.post('livesChanged'));
+    this._gameScene.events.on('achievementUnlocked', (msg, achievement) => this.events.post('achievementUnlocked', achievement));
+  }
+
+  getAchievementManager() {
+    return this._gameScene.getAchievementManager();
   }
 }

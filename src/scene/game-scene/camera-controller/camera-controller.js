@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import SCENE_CONFIG from '../../../core/configs/scene-config';
 import DEBUG_CONFIG from '../../../core/configs/debug-config';
 import { CAMERA_CONFIG, CAMERA_STATE } from './camera-config';
+import ScreenShake from './screen-shake';
 
 export default class CameraController extends THREE.Group {
   constructor(camera, orbitControls) {
@@ -15,6 +16,7 @@ export default class CameraController extends THREE.Group {
     this._cameraObject = new THREE.Object3D();
     this._lookAtLerpObject = new THREE.Object3D();
     this._isRotationEnabled = false;
+    this._screenShake = new ScreenShake(camera);
 
     this._state = CAMERA_STATE.Idle;
     this._currentLookAt = new THREE.Vector3(0, 0, 0);
@@ -24,6 +26,9 @@ export default class CameraController extends THREE.Group {
   }
 
   update(dt) {
+    // Update screen shake first
+    this._screenShake.update(dt);
+
     if (!DEBUG_CONFIG.orbitControls) {
       if (this._state === CAMERA_STATE.Rotation && this._cameraObject.position.distanceTo(this._camera.position) > 0.01) {
         this._camera.position.lerp(this._cameraObject.position, CAMERA_CONFIG.rotation.lerp);
@@ -49,6 +54,10 @@ export default class CameraController extends THREE.Group {
         }
       }
     }
+  }
+
+  shake(intensity, duration) {
+    this._screenShake.shake(intensity, duration);
   }
 
   enableRotation() {

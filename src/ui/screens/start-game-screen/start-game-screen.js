@@ -7,6 +7,7 @@ export default class StartGameScreen extends ScreenAbstract {
     super();
 
     this._startGameButton = null;
+    this._achievementsButton = null;
 
     this.touchable = true;
   }
@@ -15,6 +16,10 @@ export default class StartGameScreen extends ScreenAbstract {
     super.show();
 
     this._animateStartGameButton();
+    
+    // Ensure buttons are touchable when shown
+    this._startGameButton.touchable = true;
+    this._achievementsButton.touchable = true;
   }
 
   hide() {
@@ -27,7 +32,22 @@ export default class StartGameScreen extends ScreenAbstract {
   _init() {
     this._initLogo();
     this._initStartGameButton();
+    this._initAchievementsButton();
     this._initSignals();
+  }
+
+  _initAchievementsButton() {
+    const achievementsButton = this._achievementsButton = new TextField('🏆 Achievements', 'halloween_spooky', 0xffaa00, 50);
+    this.add(achievementsButton);
+
+    achievementsButton.dropShadow = true;
+    achievementsButton.shadowBlur = 1;
+    achievementsButton.shadowAlpha = 0.4;
+    achievementsButton.shadowDistanceX = 3;
+    achievementsButton.shadowDistanceY = 3;
+
+    achievementsButton.alignAnchor(0.5, 0.5);
+    achievementsButton.touchable = true;
   }
 
   _initLogo() {
@@ -58,8 +78,13 @@ export default class StartGameScreen extends ScreenAbstract {
 
   _initSignals() {
     this._startGameButton.on('pointerDown', () => this.post('onStartGame'));
+    this._achievementsButton.on('pointerDown', () => this.post('onViewAchievements'));
 
     this._startGameButton.on('pointerMove', () => {
+      Black.engine.containerElement.style.cursor = 'pointer';
+    });
+
+    this._achievementsButton.on('pointerMove', () => {
       Black.engine.containerElement.style.cursor = 'pointer';
     });
   }
@@ -71,7 +96,10 @@ export default class StartGameScreen extends ScreenAbstract {
     this._logo.y = bounds.top + bounds.height * 0.3;
 
     this._startGameButton.x = bounds.left + bounds.width * 0.5;
-    this._startGameButton.y = bounds.top + bounds.height * 0.7;
+    this._startGameButton.y = bounds.top + bounds.height * 0.65;
+
+    this._achievementsButton.x = bounds.left + bounds.width * 0.5;
+    this._achievementsButton.y = bounds.top + bounds.height * 0.8;
 
     if (SCENE_CONFIG.isMobile) {
       if (window.innerWidth < window.innerHeight) {

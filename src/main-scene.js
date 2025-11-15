@@ -24,6 +24,10 @@ export default class MainScene {
 
     this._scene3D.initLevel();
 
+    // Connect achievement manager to UI
+    const achievementManager = this._scene3D.getAchievementManager();
+    this._ui.setAchievementManager(achievementManager);
+
     if (DEBUG_CONFIG.startFromGameplay) {
       this._ui.onStartGame();
     }
@@ -68,5 +72,12 @@ export default class MainScene {
     this._scene3D.events.on('stopBooster', () => this._ui.stopBooster());
     this._scene3D.events.on('startInvulnerabilityBooster', (msg, duration) => this._ui.startInvulnerabilityBooster(duration));
     this._scene3D.events.on('livesChanged', () => this._ui.onLivesChanged());
+    this._scene3D.events.on('comboChanged', (msg, combo, multiplier) => this._ui.onComboChanged(combo, multiplier));
+    this._scene3D.events.on('comboMilestone', (msg, multiplier) => this._ui.onComboMilestone(multiplier));
+    this._scene3D.events.on('comboLost', (msg, combo) => this._ui.onComboLost(combo));
+    this._scene3D.events.on('bossSpawned', () => this._ui.onBossSpawned());
+    this._scene3D.events.on('bossDamaged', (msg, health, maxHealth) => this._ui.onBossDamaged(health, maxHealth));
+    this._scene3D.events.on('bossDefeated', () => this._ui.onBossDefeated());
+    this._scene3D.events.on('achievementUnlocked', (msg, achievement) => this._ui.showAchievement(achievement));
   }
 }

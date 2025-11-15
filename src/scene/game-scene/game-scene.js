@@ -14,6 +14,7 @@ import { SOUNDS_CONFIG } from '../../core/configs/sounds-config';
 import { getCoordinatesFromPosition } from '../../core/helpers/helpers';
 import RaycasterController from './raycaster-controller';
 import { ROUNDS_CONFIG } from './game-field/data/rounds-config';
+import ParticleSystem from './effects/particle-system';
 
 export default class GameScene extends THREE.Group {
   constructor(data) {
@@ -27,6 +28,7 @@ export default class GameScene extends THREE.Group {
     this._gameField = null;
     this._music = null;
     this._raycasterController = null;
+    this._particleSystem = null;
 
     this._isSoundPlayed = false;
 
@@ -37,6 +39,7 @@ export default class GameScene extends THREE.Group {
     this._gameField.update(dt);
     this._cameraController.update(dt);
     this._environment.update(dt);
+    this._particleSystem.update(dt);
   }
 
   onSoundChanged() {
@@ -124,12 +127,18 @@ export default class GameScene extends THREE.Group {
     this._initEmptySound();
     this._initRaycaster();
     this._initCameraController();
+    this._initParticleSystem();
     this._initGameField();
     this._initEnvironment();
     this._initSignals();
     this._initMusic();
 
     this._blurScene(true);
+  }
+
+  _initParticleSystem() {
+    const particleSystem = this._particleSystem = new ParticleSystem();
+    this.add(particleSystem);
   }
 
   _initGameDebug() {
@@ -198,7 +207,10 @@ export default class GameScene extends THREE.Group {
 
     this._gameField.events.on('gameOver', () => this._onGameOver());
     this._gameField.events.on('scoreChanged', (msg, score) => this.events.post('scoreChanged', score));
-    this._gameField.events.on('onConsumableCollect', (msg, consumableType, position) => this.events.post('onConsumableCollect', consumableType, position));
+    this._gameField.events.on('onConsumableCollect', (msg, consumableType, position) => {
+      this.events.post('onConsumableCollect', consumableType, position);
+      this._onConsumableCollect(consumableType, position);
+    });
     this._gameField.events.on('gameplayStarted', () => this.events.post('gameplayStarted'));
     this._gameField.events.on('roundUp', () => this._onRoundUp());
     this._gameField.events.on('onPlayerInArch', () => this._environment.setArchInvisible());
@@ -208,9 +220,46 @@ export default class GameScene extends THREE.Group {
     this._gameField.events.on('focusCameraOnPlayer', () => this._onfocusCameraOnPlayer());
     this._gameField.events.on('stopBooster', () => this.events.post('stopBooster'));
     this._gameField.events.on('startInvulnerabilityBooster', (msg, duration) => this.events.post('startInvulnerabilityBooster', duration));
-    this._gameField.events.on('livesChanged', () => this.events.post('livesChanged'));
+    this._gameField.events.on('livesChanged', () => {
+      this.events.post('livesChanged');
+      this._onPlayerHit();
+    });
+
+    this._gameField.events.on('comboChanged', (msg, combo, multiplier) => {
+      this.events.post('comboChanged', combo, multiplier);
+    });
+
+    this._gameField.events.on('comboMilestone', (msg, multiplier) => {
+      this.events.post('comboMilestone', multiplier);
+    });
+
+    this._gameField.events.on('comboLost', (msg, combo) => {
+      this.events.post('comboLost', combo);
+    });
+
+    this._gameField.events.on('bossSpawned', () => {
+      this.events.post('bossSpawned');
+    });
+
+    this._gameField.events.on('bossDamaged', (msg, health, maxHealth) => {
+      this.events.post('bossDamaged', health, maxHealth);
+    });
+
+    this._gameField.events.on('bossDefeated', (msg, scoreReward) => {
+      this.events.post('bossDefeated');
+      // Emit explosion particles at boss position
+      this._particleSystem.emitExplosion(new THREE.Vector3(0, 1, 0), 0xff8c42, 50);
+    });
 
     this._environment.events.on('onEnvironmentPumpkinClick', () => this._gameField.onEnvironmentPumpkinClick());
+
+    this._gameField.events.on('achievementUnlocked', (msg, achievement) => {
+      this.events.post('achievementUnlocked', achievement);
+    });
+  }
+
+  getAchievementManager() {
+    return this._gameField.getAchievementManager();
   }
 
   _onRoundUp() {
@@ -256,5 +305,38 @@ export default class GameScene extends THREE.Group {
 
   _onOrbitControlsChanged() {
     this._data.orbitControls.enabled = DEBUG_CONFIG.orbitControls;
+  }
+
+  _onConsumableCollect(consumableType, position) {
+    // Get color based on consumable type
+    let color = 0xffaa44; // Default golden
+    
+    if (consumableType.includes('Speed')) {
+      color = 0x44ff44; // Green
+    } else if (consumableType.includes('Invulnerability')) {
+      color = 0xff3333; // Red
+    } else if (consumableType.includes('Slow')) {
+      color = 0x4444ff; // Blue
+    }
+
+    // Emit particles
+    const worldPosition = new THREE.Vector3(position.x, position.y + 0.5, position.z);
+    this._particleSystem.emitBurst(worldPosition, color, 15, {
+      speed: 2,
+      spread: 0.8,
+      size: 0.1,
+      life: 0.6,
+      gravity: -3
+    });
+  }
+
+  _onPlayerHit() {
+    // Screen shake on hit
+    this._cameraController.shake(0.15, 0.4);
+    
+    // Red particles at player position
+    const coordinates = getCoordinatesFromPosition(GLOBAL_VARIABLES.playerPosition);
+    const playerPosition = new THREE.Vector3(coordinates.x, 0.5, coordinates.z);
+    this._particleSystem.emitExplosion(playerPosition, 0xff3333, 25);
   }
 }

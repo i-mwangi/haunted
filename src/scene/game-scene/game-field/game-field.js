@@ -20,6 +20,9 @@ import Loader from '../../../core/loader';
 import Delayed from '../../../core/helpers/delayed-call';
 import { ROUNDS_CONFIG } from './data/rounds-config';
 import { ROUNDS_CONFIG_CONSUMABLES_SCORE_ID } from './data/rounds-data';
+import ComboSystem from './combo-system';
+import BossesController from './bosses/bosses-controller';
+import AchievementManager from '../../../core/achievement-manager';
 
 export default class GameField extends THREE.Group {
   constructor(renderer, camera, audioListener) {
@@ -37,6 +40,9 @@ export default class GameField extends THREE.Group {
     this._consumablesController = null;
     this._bossesController = null;
     this._board = null;
+    this._comboSystem = null;
+    this._achievementManager = null;
+    this._roundDamageTaken = false;
 
     this._playerActions = null;
 
@@ -55,9 +61,10 @@ export default class GameField extends THREE.Group {
     this._player.update(dt);
     this._enemiesController.update(dt);
     this._consumablesController.update(dt);
+    this._comboSystem.update(dt);
+    this._bossesController.update(dt);
     this._updateGameTime(dt);
     this._updateRoundTime(dt);
-    // this._bossesController.update(dt);
   }
 
   initLevel(roundNumber) {
@@ -99,6 +106,18 @@ export default class GameField extends THREE.Group {
   onRoundChanged() {
     this._player.onRoundChanged();
     this._enemiesController.onRoundChanged();
+    
+    // Check if we should spawn a boss this round
+    if (this._bossesController.checkBossRound(GLOBAL_VARIABLES.round)) {
+      this._spawnBoss();
+    }
+  }
+
+  _spawnBoss() {
+    // Delay boss spawn slightly for dramatic effect
+    setTimeout(() => {
+      this._bossesController.spawnBoss();
+    }, 2000);
   }
 
   onButtonPressed(buttonType) {
@@ -137,6 +156,7 @@ export default class GameField extends THREE.Group {
     }
     
     GLOBAL_VARIABLES.round++;
+    this._achievementManager.onRoundComplete(GLOBAL_VARIABLES.round);
     this.events.post('roundUp');
   }
 
@@ -157,11 +177,15 @@ export default class GameField extends THREE.Group {
     this._enemiesController.reset();
     this._obstaclesController.reset();
     this._consumablesController.reset();
+    this._comboSystem.reset();
+    this._bossesController.reset();
+    this._achievementManager.resetSession();
 
     GLOBAL_VARIABLES.boosterSpawned = false;
     GLOBAL_VARIABLES.activeBooster = null;
     GLOBAL_VARIABLES.playerLives = 3;
     this._roundTime = 0;
+    this._roundDamageTaken = false;
     this._resetGameTime();
     this._setScore(0);
   }
@@ -186,14 +210,32 @@ export default class GameField extends THREE.Group {
 
       if (this._roundTime > ROUNDS_CONFIG[currentRound].duration) {
         this._roundTime = 0;
+        
+        // Check no damage achievement
+        if (!this._roundDamageTaken) {
+          this._achievementManager.onRoundNoDamage();
+        }
+        this._roundDamageTaken = false;
+        
         this._roundUp();
       }
     }
   }
 
   _addScore(score) {
-    this._score += score;
+    // Apply combo multiplier
+    const multiplier = this._comboSystem.getMultiplier();
+    const finalScore = Math.floor(score * multiplier);
+    
+    this._score += finalScore;
     this.events.post('scoreChanged', this._score);
+    
+    // Notify combo system of collection
+    this._comboSystem.onCollect();
+    
+    // Notify achievement manager
+    this._achievementManager.onCollect();
+    this._achievementManager.onScore(this._score);
   }
 
   _setScore(score) {
@@ -215,6 +257,8 @@ export default class GameField extends THREE.Group {
   }
 
   _init() {
+    this._initAchievementManager();
+    this._initComboSystem();
     this._initPlayer();
     this._initEnemiesController();
     this._initBossesController();
@@ -227,6 +271,37 @@ export default class GameField extends THREE.Group {
     this._initGameOverSound();
 
     this._initSignals();
+  }
+
+  _initAchievementManager() {
+    const achievementManager = this._achievementManager = new AchievementManager();
+    
+    // Forward achievement events
+    achievementManager.events.on('achievementUnlocked', (msg, achievement) => {
+      this.events.post('achievementUnlocked', achievement);
+    });
+  }
+
+  getAchievementManager() {
+    return this._achievementManager;
+  }
+
+  _initComboSystem() {
+    const comboSystem = this._comboSystem = new ComboSystem();
+    
+    // Forward combo events
+    comboSystem.events.on('comboChanged', (msg, combo, multiplier) => {
+      this.events.post('comboChanged', combo, multiplier);
+      this._achievementManager.onCombo(combo);
+    });
+    
+    comboSystem.events.on('comboMilestone', (msg, multiplier) => {
+      this.events.post('comboMilestone', multiplier);
+    });
+    
+    comboSystem.events.on('comboLost', (msg, combo) => {
+      this.events.post('comboLost', combo);
+    });
   }
 
   _initPlayer() {
@@ -248,8 +323,31 @@ export default class GameField extends THREE.Group {
   }
 
   _initBossesController() {
-    // const bossesController = this._bossesController = new BossesController();
-    // this.add(bossesController);
+    const bossesController = this._bossesController = new BossesController();
+    this.add(bossesController);
+
+    // Forward boss events
+    bossesController.events.on('bossSpawned', () => {
+      this.events.post('bossSpawned');
+    });
+
+    bossesController.events.on('bossDamaged', (msg, health, maxHealth) => {
+      this.events.post('bossDamaged', health, maxHealth);
+    });
+
+    bossesController.events.on('bossAttack', () => {
+      this.events.post('bossAttack');
+      // Boss attacks player
+      if (GLOBAL_VARIABLES.activeBooster !== 'BOOSTER_CANDY_PLAYER_INVULNERABILITY') {
+        this._player.onDamage();
+      }
+    });
+
+    bossesController.events.on('bossDefeated', (msg, scoreReward) => {
+      this.events.post('bossDefeated', scoreReward);
+      this._addScore(scoreReward);
+      this._achievementManager.onBossDefeated();
+    });
   }
 
   _initObstaclesController() {
@@ -387,6 +485,8 @@ export default class GameField extends THREE.Group {
     }
 
     GLOBAL_VARIABLES.playerLives--;
+    this._roundDamageTaken = true;
+    this._achievementManager.onDamage();
     this.events.post('livesChanged');
 
     if (GLOBAL_VARIABLES.playerLives <= 0) {

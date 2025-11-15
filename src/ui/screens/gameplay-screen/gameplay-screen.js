@@ -7,6 +7,9 @@ import SCENE_CONFIG from "../../../core/configs/scene-config";
 import DPad from "./d-pad";
 import { ROUNDS_CONFIG } from "../../../scene/game-scene/game-field/data/rounds-config";
 import { ROUNDS_CONFIG_CONSUMABLES_SCORE_ID } from "../../../scene/game-scene/game-field/data/rounds-data";
+import ComboDisplay from "./combo-display";
+import BossHealthBar from "./boss-health-bar";
+import AchievementNotification from "./achievement-notification";
 
 export default class GameplayScreen extends ScreenAbstract {
   constructor() {
@@ -23,6 +26,69 @@ export default class GameplayScreen extends ScreenAbstract {
     this._roundGroup = null;
     this._newRoundText = null;
     this._dPad = null;
+    this._comboDisplay = null;
+    this._bossHealthBar = null;
+    this._bossWarningText = null;
+    this._achievementNotification = null;
+  }
+
+  showAchievement(achievement) {
+    this._achievementNotification.showAchievement(achievement);
+  }
+
+  onComboChanged(combo, multiplier) {
+    this._comboDisplay.onComboChanged(combo, multiplier);
+  }
+
+  onComboMilestone(multiplier) {
+    this._comboDisplay.onComboMilestone(multiplier);
+  }
+
+  onComboLost(combo) {
+    this._comboDisplay.onComboLost(combo);
+  }
+
+  onBossSpawned() {
+    this._bossHealthBar.show(5); // Evil pumpkin has 5 health
+    this._hideBossWarning();
+  }
+
+  onBossDamaged(health, maxHealth) {
+    this._bossHealthBar.updateHealth(health, maxHealth);
+  }
+
+  onBossDefeated() {
+    this._bossHealthBar.hide();
+  }
+
+  showBossWarning() {
+    this._bossWarningText.visible = true;
+    this._bossWarningText.alpha = 1;
+    this._bossWarningText.scaleX = 0.5;
+    this._bossWarningText.scaleY = 0.5;
+
+    const scale = { value: 0.5 };
+    const alpha = { value: 1 };
+
+    new Tween(scale, { value: 1.2 }, 300, { ease: Ease.backOut })
+      .on('update', () => {
+        this._bossWarningText.scaleX = scale.value;
+        this._bossWarningText.scaleY = scale.value;
+      })
+      .run();
+
+    new Tween(alpha, { value: 0 }, 500, { delay: 1500 })
+      .on('update', () => {
+        this._bossWarningText.alpha = alpha.value;
+      })
+      .on('complete', () => {
+        this._bossWarningText.visible = false;
+      })
+      .run();
+  }
+
+  _hideBossWarning() {
+    this._bossWarningText.visible = false;
   }
 
   update(dt) {
@@ -192,6 +258,33 @@ export default class GameplayScreen extends ScreenAbstract {
     this._initDPad();
     this._initTutorial();
     this._initLives();
+    this._initComboDisplay();
+    this._initBossHealthBar();
+    this._initBossWarningText();
+    this._initAchievementNotification();
+  }
+
+  _initAchievementNotification() {
+    const achievementNotification = this._achievementNotification = new AchievementNotification();
+    this.add(achievementNotification);
+  }
+
+  _initComboDisplay() {
+    const comboDisplay = this._comboDisplay = new ComboDisplay();
+    this.add(comboDisplay);
+  }
+
+  _initBossHealthBar() {
+    const bossHealthBar = this._bossHealthBar = new BossHealthBar();
+    this.add(bossHealthBar);
+  }
+
+  _initBossWarningText() {
+    const bossWarningText = this._bossWarningText = new TextField('⚠️ BOSS INCOMING! ⚠️', 'halloween_spooky', 0xff3333, 80);
+    this.add(bossWarningText);
+
+    bossWarningText.alignAnchor(0.5, 0.5);
+    bossWarningText.visible = false;
   }
 
   _initScore() {
@@ -387,6 +480,15 @@ export default class GameplayScreen extends ScreenAbstract {
 
     this._livesGroup.x = bounds.left + 300;
     this._livesGroup.y = bounds.top + 70;
+
+    this._bossHealthBar.x = bounds.left + bounds.width * 0.5;
+    this._bossHealthBar.y = bounds.top + 100;
+
+    this._bossWarningText.x = bounds.left + bounds.width * 0.5;
+    this._bossWarningText.y = bounds.top + bounds.height * 0.4;
+
+    this._achievementNotification.x = bounds.left + bounds.width * 0.5;
+    this._achievementNotification.y = bounds.top + 250;
 
     if (SCENE_CONFIG.isMobile) {
       if (window.innerWidth < window.innerHeight) {

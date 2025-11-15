@@ -5,6 +5,8 @@ import DEBUG_CONFIG from "../core/configs/debug-config";
 import StartGameScreen from "./screens/start-game-screen/start-game-screen";
 import GameOverScreen from "./screens/game-over-screen/game-over-screen";
 import GameplayScreen from "./screens/gameplay-screen/gameplay-screen";
+import LeaderboardScreen from "./screens/leaderboard-screen/leaderboard-screen";
+import AchievementsScreen from "./screens/achievements-screen/achievements-screen";
 
 export default class UI extends DisplayObject {
   constructor() {
@@ -15,11 +17,22 @@ export default class UI extends DisplayObject {
 
     this._startGameScreen = null;
     this._gameplayScreen = null;
-    this._gamOverScreen = null;
+    this._gameOverScreen = null;
+    this._leaderboardScreen = null;
+    this._achievementsScreen = null;
 
     this._allScreens = [];
+    this._maxCombo = 0;
 
     this.touchable = true;
+  }
+
+  showAchievement(achievement) {
+    this._gameplayScreen.showAchievement(achievement);
+  }
+
+  setAchievementManager(achievementManager) {
+    this._achievementManager = achievementManager;
   }
 
   update(dt) {
@@ -33,7 +46,9 @@ export default class UI extends DisplayObject {
   onGameOver() {
     this._gameplayScreen.hide();
     this._gameplayScreen.reset();
+    this._gameOverScreen.setMaxCombo(this._maxCombo);
     this._gameOverScreen.show();
+    this._maxCombo = 0; // Reset for next game
   }
 
   onScoreChanged(score) {
@@ -69,6 +84,39 @@ export default class UI extends DisplayObject {
     this._gameplayScreen.updateLives();
   }
 
+  onComboChanged(combo, multiplier) {
+    this._gameplayScreen.onComboChanged(combo, multiplier);
+    
+    // Track max combo
+    if (combo > this._maxCombo) {
+      this._maxCombo = combo;
+    }
+  }
+
+  onComboMilestone(multiplier) {
+    this._gameplayScreen.onComboMilestone(multiplier);
+  }
+
+  onComboLost(combo) {
+    this._gameplayScreen.onComboLost(combo);
+  }
+
+  onBossSpawned() {
+    this._gameplayScreen.onBossSpawned();
+  }
+
+  onBossDamaged(health, maxHealth) {
+    this._gameplayScreen.onBossDamaged(health, maxHealth);
+  }
+
+  onBossDefeated() {
+    this._gameplayScreen.onBossDefeated();
+  }
+
+  showBossWarning() {
+    this._gameplayScreen.showBossWarning();
+  }
+
   onAdded() {
     this._initOverlay();
     this._initSoundIcon();
@@ -93,8 +141,17 @@ export default class UI extends DisplayObject {
     this._initStartGameScreen();
     this._initGameplayScreen();
     this._initGameOverScreen();
+    this._initLeaderboardScreen();
+    this._initAchievementsScreen();
 
     this._startGameScreen.show();
+  }
+
+  _initAchievementsScreen() {
+    const achievementsScreen = this._achievementsScreen = new AchievementsScreen();
+    this.add(achievementsScreen);
+
+    this._allScreens.push(achievementsScreen);
   }
 
   _initStartGameScreen() {
@@ -118,6 +175,13 @@ export default class UI extends DisplayObject {
     this._allScreens.push(gameOverScreen);
   }
 
+  _initLeaderboardScreen() {
+    const leaderboardScreen = this._leaderboardScreen = new LeaderboardScreen();
+    this.add(leaderboardScreen);
+
+    this._allScreens.push(leaderboardScreen);
+  }
+
   _initSignals() {
     this._overlay.on('onPointerMove', (msg, x, y) => this._onOverlayPointerMove(x, y));
     this._overlay.on('onPointerDown', () => this.post('onPointerDown'));
@@ -125,7 +189,11 @@ export default class UI extends DisplayObject {
     this._soundIcon.on('onSoundChanged', () => this.post('onSoundChanged'));
 
     this._startGameScreen.on('onStartGame', () => this.onStartGame());
+    this._startGameScreen.on('onViewAchievements', () => this._onViewAchievementsFromStart());
     this._gameOverScreen.on('onRestartGame', () => this._onRestartGame());
+    this._gameOverScreen.on('onViewLeaderboard', () => this._onViewLeaderboard());
+    this._leaderboardScreen.on('onClose', () => this._onCloseLeaderboard());
+    this._achievementsScreen.on('onBack', () => this._onCloseAchievements());
 
     this._gameplayScreen.on('onLeft', () => this.post('onLeft'));
     this._gameplayScreen.on('onRight', () => this.post('onRight'));
@@ -165,8 +233,38 @@ export default class UI extends DisplayObject {
 
   _onRestartGame() {
     this._gameOverScreen.hide();
+    this._leaderboardScreen.hide();
     this._gameplayScreen.show();
     this.post('onRestartGame');
+  }
+
+  _onViewLeaderboard() {
+    this._gameOverScreen.hide();
+    this._leaderboardScreen.show();
+  }
+
+  _onCloseLeaderboard() {
+    this._leaderboardScreen.hide();
+    this._gameOverScreen.show();
+  }
+
+  _onViewAchievementsFromStart() {
+    if (this._achievementManager) {
+      const allAchievements = this._achievementManager.getAllAchievements();
+      const unlockedIds = this._achievementManager.getUnlockedAchievements().map(a => a.id);
+      const progress = this._achievementManager.getProgress();
+      
+      this._achievementsScreen.setAchievements(allAchievements, unlockedIds);
+      this._achievementsScreen.setProgress(progress);
+    }
+    
+    this._startGameScreen.hide();
+    this._achievementsScreen.show();
+  }
+
+  _onCloseAchievements() {
+    this._achievementsScreen.hide();
+    this._startGameScreen.show();
   }
 
   _handleResize() {
