@@ -1,0 +1,7 @@
+{
+  "name": "Performance Optimization Review",
+  "description": "Analyzes game performance and suggests optimizations",
+  "trigger": "manual",
+  "instructions": "Review the game code for performance issues:\n1. Check for unnecessary re-renders in the game loop\n2. Identify objects that should be pooled/reused\n3. Look for expensive operations in update() methods\n4. Verify proper disposal of Three.js geometries and materials\n5. Check for memory leaks in event listeners\n6. Suggest optimizations for mobile devices\n7. Review asset loading strategy",
+  "enabled": true
+}

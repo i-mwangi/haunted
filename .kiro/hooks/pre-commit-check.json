@@ -1,0 +1,7 @@
+{
+  "name": "Pre-commit Code Quality Check",
+  "description": "Runs before git commit to ensure code quality and catch common issues",
+  "trigger": "manual",
+  "instructions": "Before committing code:\n1. Check for console.log statements that should be removed\n2. Verify all imports are used\n3. Check for TODO comments that need addressing\n4. Ensure no hardcoded values that should be in config\n5. Verify proper error handling in async functions\n6. Check for memory leaks in Three.js scene cleanup",
+  "enabled": true
+}
