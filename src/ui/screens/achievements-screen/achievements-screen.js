@@ -16,6 +16,7 @@ export default class AchievementsScreen extends ScreenAbstract {
   }
 
   show() {
+    console.log('AchievementsScreen.show() called');
     super.show();
     this.touchable = true;
     
@@ -27,10 +28,12 @@ export default class AchievementsScreen extends ScreenAbstract {
     // Ensure back button is touchable
     if (this._backButton) {
       this._backButton.touchable = true;
+      console.log('Back button made touchable');
     }
   }
 
   hide() {
+    console.log('AchievementsScreen.hide() called');
     super.hide();
     this.touchable = false;
     

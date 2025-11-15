@@ -13,6 +13,7 @@ export default class StartGameScreen extends ScreenAbstract {
   }
 
   show() {
+    console.log('StartGameScreen.show() called');
     super.show();
 
     this._animateStartGameButton();
@@ -20,6 +21,9 @@ export default class StartGameScreen extends ScreenAbstract {
     // Ensure buttons are touchable when shown
     this._startGameButton.touchable = true;
     this._achievementsButton.touchable = true;
+    
+    console.log('Start button touchable:', this._startGameButton.touchable);
+    console.log('Achievements button touchable:', this._achievementsButton.touchable);
   }
 
   hide() {
@@ -77,8 +81,15 @@ export default class StartGameScreen extends ScreenAbstract {
   }
 
   _initSignals() {
-    this._startGameButton.on('pointerDown', () => this.post('onStartGame'));
-    this._achievementsButton.on('pointerDown', () => this.post('onViewAchievements'));
+    this._startGameButton.on('pointerDown', () => {
+      console.log('Start game button clicked');
+      this.post('onStartGame');
+    });
+    
+    this._achievementsButton.on('pointerDown', () => {
+      console.log('Achievements button clicked');
+      this.post('onViewAchievements');
+    });
 
     this._startGameButton.on('pointerMove', () => {
       Black.engine.containerElement.style.cursor = 'pointer';

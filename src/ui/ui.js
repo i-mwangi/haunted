@@ -249,22 +249,39 @@ export default class UI extends DisplayObject {
   }
 
   _onViewAchievementsFromStart() {
+    console.log('_onViewAchievementsFromStart called');
+    
     if (this._achievementManager) {
       const allAchievements = this._achievementManager.getAllAchievements();
       const unlockedIds = this._achievementManager.getUnlockedAchievements().map(a => a.id);
       const progress = this._achievementManager.getProgress();
+      
+      console.log('Setting achievements:', allAchievements.length, 'unlocked:', unlockedIds.length);
       
       this._achievementsScreen.setAchievements(allAchievements, unlockedIds);
       this._achievementsScreen.setProgress(progress);
     }
     
     this._startGameScreen.hide();
+    
+    // Bring achievements screen to front
+    this.setChildIndex(this._achievementsScreen, this.numChildren - 1);
     this._achievementsScreen.show();
+    
+    console.log('Achievements screen shown, visible:', this._achievementsScreen.visible);
   }
 
   _onCloseAchievements() {
+    console.log('_onCloseAchievements called');
+    
     this._achievementsScreen.hide();
+    
+    // Bring start screen to front
+    this.setChildIndex(this._startGameScreen, this.numChildren - 1);
     this._startGameScreen.show();
+    
+    console.log('Start screen shown, visible:', this._startGameScreen.visible);
+    console.log('Achievements button touchable:', this._startGameScreen._achievementsButton.touchable);
   }
 
   _handleResize() {
