@@ -12,6 +12,7 @@ import { Black, MessageDispatcher } from "black-engine";
 import { GLOBAL_VARIABLES } from "../game-field/data/global-variables";
 import { GAME_STATE } from "../game-field/data/game-data";
 import { SOUNDS_CONFIG } from "../../../core/configs/sounds-config";
+import ChristmasLights from "./christmas-lights/christmas-lights";
 
 export default class Environment extends THREE.Group {
   constructor(raycasterController, audioListener) {
@@ -30,6 +31,7 @@ export default class Environment extends THREE.Group {
     this._leftPostSkull = null;
     this._rightPostSkull = null;
     this._clickSound = null;
+    this._christmasLights = [];
 
     this._environmentObjects = {};
     this._pointerPosition = new THREE.Vector2();
@@ -44,6 +46,7 @@ export default class Environment extends THREE.Group {
   update(dt) {
     this._fireflies.update(dt);
     this._updateEnvironmentObjects(dt);
+    this._updateChristmasLights(dt);
     this._checkIntersection();
 
     this._previousPointerPosition.set(this._pointerPosition.x, this._pointerPosition.y);
@@ -128,6 +131,7 @@ export default class Environment extends THREE.Group {
     this._initClickSound();
     this._initEnvironmentObjectsObject();
     this._addMeshesToRaycasterController();
+    this._initChristmasLights();
     this._initSignals();
   }
 
@@ -247,5 +251,46 @@ export default class Environment extends THREE.Group {
     }
 
     return isAllObjectsIdle;
+  }
+
+  _initChristmasLights() {
+    // Find all tree meshes in the environment
+    const trees = this._findTreeMeshes(this._environmentView);
+    
+    trees.forEach(tree => {
+      const lights = new ChristmasLights(tree);
+      this.add(lights);
+      this._christmasLights.push(lights);
+    });
+  }
+
+  _findTreeMeshes(object) {
+    const trees = [];
+
+    object.traverse((child) => {
+      if (child.isMesh) {
+        // Check if this mesh looks like a tree based on its geometry
+        // Trees typically have conical/cylindrical shapes with height > width
+        const bbox = new THREE.Box3().setFromObject(child);
+        const width = Math.max(bbox.max.x - bbox.min.x, bbox.max.z - bbox.min.z);
+        const height = bbox.max.y - bbox.min.y;
+
+        // If height is greater than width and has reasonable size, it's likely a tree
+        // Adjusted threshold to catch more tree-like objects
+        if (height > width * 1.2 && height > 0.5 && width > 0.1) {
+          console.log('Found tree:', child.name, 'Height:', height.toFixed(2), 'Width:', width.toFixed(2));
+          trees.push(child);
+        }
+      }
+    });
+
+    console.log(`Total trees found: ${trees.length}`);
+    return trees;
+  }
+
+  _updateChristmasLights(dt) {
+    this._christmasLights.forEach(lights => {
+      lights.update(dt);
+    });
   }
 }
