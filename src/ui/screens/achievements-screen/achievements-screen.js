@@ -1,4 +1,4 @@
-import { Black, TextField } from 'black-engine';
+import { Black, TextField, DisplayObject } from 'black-engine';
 import ScreenAbstract from '../screen-abstract';
 
 export default class AchievementsScreen extends ScreenAbstract {
@@ -60,7 +60,7 @@ export default class AchievementsScreen extends ScreenAbstract {
     // Clear existing achievement displays
     if (this._achievementsList && this._achievementsList.length > 0) {
       this._achievementsList.forEach(container => {
-        this.remove(container);
+        container.removeFromParent();
       });
     }
 
@@ -77,7 +77,7 @@ export default class AchievementsScreen extends ScreenAbstract {
   }
 
   _createAchievementDisplay(achievement, yPos) {
-    const container = new TextField('', 'halloween_spooky', 0xffffff, 1);
+    const container = new DisplayObject();
     this.add(container);
 
     const icon = new TextField(achievement.icon, 'halloween_spooky', 0xffffff, 50);
