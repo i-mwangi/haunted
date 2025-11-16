@@ -54,6 +54,9 @@ const sounds = [
   'death.mp3',
   'game-over.mp3',
   'click.mp3',
+  'public_sound_heartbeat.mp3',
+  'public_sound_owl_hoot.mp3',
+  'public_sound_wolf-howl.mp3',
 ];
 
 const fonts = [

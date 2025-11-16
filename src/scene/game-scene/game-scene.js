@@ -29,6 +29,12 @@ export default class GameScene extends THREE.Group {
     this._music = null;
     this._raycasterController = null;
     this._particleSystem = null;
+    this._heartbeatSound = null;
+    this._owlHootSound = null;
+    this._wolfHowlSound = null;
+    this._owlSoundTimer = 0;
+    this._wolfSoundTimer = 0;
+    this._heartbeatPlaying = false;
 
     this._isSoundPlayed = false;
 
@@ -40,12 +46,20 @@ export default class GameScene extends THREE.Group {
     this._cameraController.update(dt);
     this._environment.update(dt);
     this._particleSystem.update(dt);
+    this._updateAmbientSounds(dt);
   }
 
   onSoundChanged() {
     this._gameDebug.updateSoundController();
-    const volume = SOUNDS_CONFIG.enabled ? SOUNDS_CONFIG.masterVolume * SOUNDS_CONFIG.musicVolume : 0;
-    this._music.setVolume(volume);
+    const musicVolume = SOUNDS_CONFIG.enabled ? SOUNDS_CONFIG.masterVolume * SOUNDS_CONFIG.musicVolume : 0;
+    this._music.setVolume(musicVolume);
+
+    // Update ambient sound volumes - all at 100%
+    const ambientVolume = SOUNDS_CONFIG.enabled ? SOUNDS_CONFIG.masterVolume * 1.0 : 0;
+
+    this._heartbeatSound.setVolume(ambientVolume);
+    this._owlHootSound.setVolume(ambientVolume);
+    this._wolfHowlSound.setVolume(ambientVolume);
 
     this._gameField.onSoundChanged();
     this._environment.onSoundChanged();
@@ -56,12 +70,37 @@ export default class GameScene extends THREE.Group {
     this._gameField.startGame();
     this._music.play();
     this._cameraController.enableRotation();
+
+    // Play wolf howl on game start
+    this._playWolfHowl();
+
+    // Start heartbeat and owl sounds
+    setTimeout(() => {
+      this._playOwlHoot();
+    }, 2000);
+    setTimeout(() => {
+      if (this._heartbeatSound && SOUNDS_CONFIG.enabled) {
+        this._heartbeatSound.play();
+        this._heartbeatPlaying = true;
+      }
+    }, 4000);
   }
 
   onRestartGame() {
     this._gameField.restartGame();
     this._unBlurScene();
     this._cameraController.backToPosition();
+
+    // Play wolf howl on restart
+    this._playWolfHowl();
+
+    // Stop heartbeat on restart
+    if (this._heartbeatPlaying) {
+      this._heartbeatSound.stop();
+      this._heartbeatPlaying = false;
+    }
+    this._owlSoundTimer = 0;
+    this._wolfSoundTimer = 0;
   }
 
   onButtonPressed(buttonType) {
@@ -195,6 +234,23 @@ export default class GameScene extends THREE.Group {
       music.setLoop(true);
       music.setVolume(SOUNDS_CONFIG.masterVolume * SOUNDS_CONFIG.musicVolume);
     });
+
+    // Initialize ambient sounds
+    this._heartbeatSound = new THREE.Audio(this._data.audioListener);
+    this._owlHootSound = new THREE.Audio(this._data.audioListener);
+    this._wolfHowlSound = new THREE.Audio(this._data.audioListener);
+
+    Loader.events.on('onAudioLoaded', () => {
+      this._heartbeatSound.setBuffer(Loader.assets['public_sound_heartbeat']);
+      this._heartbeatSound.setLoop(true);
+      this._heartbeatSound.setVolume(SOUNDS_CONFIG.masterVolume * 1.0);
+
+      this._owlHootSound.setBuffer(Loader.assets['public_sound_owl_hoot']);
+      this._owlHootSound.setVolume(SOUNDS_CONFIG.masterVolume * 1.0);
+
+      this._wolfHowlSound.setBuffer(Loader.assets['public_sound_wolf-howl']);
+      this._wolfHowlSound.setVolume(SOUNDS_CONFIG.masterVolume * 1.0);
+    });
   }
 
   _initSignals() {
@@ -266,6 +322,11 @@ export default class GameScene extends THREE.Group {
     this._gameDebug.onRoundChanged();
     this._gameField.onRoundChanged();
     this.events.post('onRoundChanged');
+
+    // Play wolf howl every 2 rounds (round 2, 4, 6, 8, etc.)
+    if (GLOBAL_VARIABLES.round % 2 === 0 && GLOBAL_VARIABLES.round > 0) {
+      this._playWolfHowl();
+    }
   }
 
   _debugIncreaseRound() {
@@ -295,6 +356,12 @@ export default class GameScene extends THREE.Group {
   _onGameOver() {
     this._blurScene();
     this.events.post('gameOver');
+
+    // Stop heartbeat on game over
+    if (this._heartbeatPlaying) {
+      this._heartbeatSound.stop();
+      this._heartbeatPlaying = false;
+    }
   }
 
   _onfocusCameraOnPlayer() {
@@ -310,7 +377,7 @@ export default class GameScene extends THREE.Group {
   _onConsumableCollect(consumableType, position) {
     // Get color based on consumable type
     let color = 0xffaa44; // Default golden
-    
+
     if (consumableType.includes('Speed')) {
       color = 0x44ff44; // Green
     } else if (consumableType.includes('Invulnerability')) {
@@ -333,10 +400,48 @@ export default class GameScene extends THREE.Group {
   _onPlayerHit() {
     // Screen shake on hit
     this._cameraController.shake(0.15, 0.4);
-    
+
     // Red particles at player position
     const coordinates = getCoordinatesFromPosition(GLOBAL_VARIABLES.playerPosition);
     const playerPosition = new THREE.Vector3(coordinates.x, 0.5, coordinates.z);
     this._particleSystem.emitExplosion(playerPosition, 0xff3333, 25);
+
+    // Check if player has only 1 life left - start heartbeat
+    this._updateHeartbeatSound();
+  }
+
+  _updateAmbientSounds(dt) {
+    // Owl hoots every 3 seconds during gameplay
+    if (GLOBAL_VARIABLES.gameState === 2) { // Gameplay state
+      this._owlSoundTimer += dt;
+
+      if (this._owlSoundTimer >= 3) {
+        this._playOwlHoot();
+        this._owlSoundTimer = 0;
+      }
+    }
+  }
+
+  _playOwlHoot() {
+    if (!SOUNDS_CONFIG.enabled) return;
+
+    if (this._owlHootSound.isPlaying) {
+      this._owlHootSound.stop();
+    }
+    this._owlHootSound.play();
+  }
+
+  _playWolfHowl() {
+    if (!SOUNDS_CONFIG.enabled) return;
+
+    if (this._wolfHowlSound.isPlaying) {
+      this._wolfHowlSound.stop();
+    }
+    this._wolfHowlSound.play();
+  }
+
+  _updateHeartbeatSound() {
+    // Heartbeat plays continuously from game start, not based on lives
+    // It's started in onStartGame() and stopped on game over/restart
   }
 }

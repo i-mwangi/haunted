@@ -339,7 +339,7 @@ export default class GameField extends THREE.Group {
       this.events.post('bossAttack');
       // Boss attacks player
       if (GLOBAL_VARIABLES.activeBooster !== 'BOOSTER_CANDY_PLAYER_INVULNERABILITY') {
-        this._player.onDamage();
+        this._onLoseLive();
       }
     });
 
