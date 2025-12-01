@@ -291,13 +291,13 @@ export default class GameplayScreen extends ScreenAbstract {
     const scoreGroup = this._scoreGroup = new DisplayObject();
     this.add(scoreGroup);
 
-    const scoreCaption = new TextField('Score:', 'halloween_spooky', 0x000000, 50);
+    const scoreCaption = new TextField('Score:', 'halloween_spooky', 0xff8800, 50);
 
     scoreCaption.alignAnchor(0, 0.5);
     scoreGroup.add(scoreCaption);
     scoreCaption.x = -60
 
-    const scoreNumberText = this._scoreNumberText = new TextField('0', 'halloween_spooky', 0x000000, 50);
+    const scoreNumberText = this._scoreNumberText = new TextField('0', 'halloween_spooky', 0xff8800, 50);
 
     scoreNumberText.alignAnchor(0, 0.5);
     scoreGroup.add(scoreNumberText);
@@ -308,13 +308,13 @@ export default class GameplayScreen extends ScreenAbstract {
     const roundGroup = this._roundGroup = new DisplayObject();
     this.add(roundGroup);
 
-    const roundCaption = this._roundCaption = new TextField('Round:', 'halloween_spooky', 0x000000, 60);
+    const roundCaption = this._roundCaption = new TextField('Round:', 'halloween_spooky', 0xff8800, 60);
     roundGroup.add(roundCaption);
 
     roundCaption.alignAnchor(0, 0.5);
     roundCaption.x = -75;
 
-    const roundNumberText = this._roundNumberText = new TextField('1', 'halloween_spooky', 0x000000, 60);
+    const roundNumberText = this._roundNumberText = new TextField('1', 'halloween_spooky', 0xff8800, 60);
     roundGroup.add(roundNumberText);
 
     roundNumberText.alignAnchor(0, 0.5);
@@ -444,13 +444,13 @@ export default class GameplayScreen extends ScreenAbstract {
     const livesGroup = this._livesGroup = new DisplayObject();
     this.add(livesGroup);
 
-    const livesCaption = new TextField('Lives:', 'halloween_spooky', 0x000000, 50);
+    const livesCaption = new TextField('Lives:', 'halloween_spooky', 0xff8800, 50);
 
     livesCaption.alignAnchor(0, 0.5);
     livesGroup.add(livesCaption);
     livesCaption.x = -55;
 
-    const livesNumberText = this._livesNumberText = new TextField('0', 'halloween_spooky', 0x000000, 50);
+    const livesNumberText = this._livesNumberText = new TextField('0', 'halloween_spooky', 0xff8800, 50);
 
     livesNumberText.alignAnchor(0, 0.5);
     livesGroup.add(livesNumberText);
