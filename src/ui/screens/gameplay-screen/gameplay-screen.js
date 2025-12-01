@@ -291,7 +291,7 @@ export default class GameplayScreen extends ScreenAbstract {
     const scoreGroup = this._scoreGroup = new DisplayObject();
     this.add(scoreGroup);
 
-    const scoreCaption = new TextField('Score:', 'halloween_spooky', 0xff8800, 50);
+    const scoreCaption = new TextField('Score:', 'halloween_spooky', 0, 50);
 
     scoreCaption.alignAnchor(0, 0.5);
     scoreGroup.add(scoreCaption);
