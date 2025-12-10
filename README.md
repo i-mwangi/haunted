@@ -60,6 +60,33 @@ npm run dev
 npm run build
 ```
 
+## 🏗️ Architecture
+
+Ghost Dodger uses a layered, event-driven architecture with clear separation between 3D rendering and UI:
+
+![Architecture Diagram](public/assets/arch.png)
+
+### Key Components
+
+**Entry Point Layer**
+- `main.js` - Application bootstrap
+- `base-scene.js` - Three.js + Black Engine setup
+
+**Orchestration Layer**
+- `main-scene.js` - Event mediator bridging 3D scene and UI
+- Event-driven communication (no tight coupling)
+
+**3D Scene Layer (Three.js)**
+- `scene3d.js` - 3D scene wrapper
+- `game-scene/` - Player, enemies, collectibles, physics, achievements
+
+**UI Layer (Black Engine)**
+- `ui.js` - Screen manager
+- Multiple screens: Start, Gameplay HUD, Game Over, Leaderboard, Achievements
+
+**Core Systems**
+- Asset loading, achievement tracking, leaderboard persistence, shared materials
+
 ## 🎨 Credits
 
 Built with:
