@@ -1,6 +1,6 @@
 # 👻 Ghost Dodger
 
-A spooky Halloween-themed 3D arcade game where you control a pumpkin character dodging ghosts, collecting candy, and surviving as long as possible!
+A spooky Halloween-themed 3D arcade game where you control a pumpkin character dodging ghosts, collecting candy, and surviving as long as possible
 
 ![Ghost Dodger Gameplay](public/assets/example.png)
 
